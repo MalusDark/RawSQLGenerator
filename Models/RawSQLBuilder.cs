@@ -1,4 +1,5 @@
 ﻿using RawSQLGenerator.Enums;
+using RawSQLGenerator.Helpers;
 using System.Drawing;
 using System.Text;
 
@@ -38,7 +39,7 @@ public class RawSQLBuilder
 		{ 
 			for (var i = 0; i < joins.Count; i++)
 			{
-				sql.Append($" {GetJoinTypeString(joins[i])}");
+				sql.Append($" {SQLHelper.GetJoinTypeString(joins[i])}");
 				if (tableAliases != null && tableAliases.ContainsKey(i))
 				{
 					sql.Append($" ON {tableAliases.Where(a => a.Key.Equals(i)).Select(a => a.Value).First()}");
@@ -47,17 +48,5 @@ public class RawSQLBuilder
 		}
 
 		return sql.ToString();
-	}
-
-	private static string GetJoinTypeString(JoinTypes joinType)
-	{
-		return joinType switch
-		{
-			JoinTypes.Inner => "INNER JOIN",
-			JoinTypes.Left => "LEFT JOIN",
-			JoinTypes.Right => "RIGHT JOIN",
-			JoinTypes.Full => "FULL JOIN",
-			_ => "JOIN"
-		};
 	}
 }
