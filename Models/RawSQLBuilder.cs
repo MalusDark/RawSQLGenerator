@@ -10,12 +10,12 @@ namespace RawSQLGenerator.Models;
 public class RawSQLBuilder
 {
 	/// <summary>
-	/// Method for generating a ONLY select query based on your dictionary of the form «table name - column name» 
+	/// Method for generating a select query based on your dictionary of the form «table name - column name» 
 	/// and aliases as « { 0, "Users.Id = UserId" } ».
 	/// </summary>
 	/// <param name="tablesWithColumns"></param>
 	/// <returns></returns>
-	public static string OnlySelect(Dictionary<string, List<string>> tablesWithColumns, 
+	public static string SelectWithJoins(Dictionary<string, List<string>> tablesWithColumns, 
 		List<JoinTypes> joins = null,
 		Dictionary<int, string> tableAliases = null)
 	{
@@ -46,6 +46,32 @@ public class RawSQLBuilder
 				}
 			}
 		}
+
+		return sql.ToString();
+	}
+
+	/// <summary>
+	/// Method for generating a ONLY select query without joins based on your dictionary of the form «table name - column name»
+	/// </summary>
+	/// <param name="tablesWithColumns"></param>
+	/// <returns></returns>
+	public static string OnlySelect(Dictionary<string, List<string>> tablesWithColumns)
+	{
+		var allColumns = new List<string>();
+		var sql = new StringBuilder();
+		sql.Append("SELECT ");
+
+		foreach (var table in tablesWithColumns)
+		{
+			foreach (var column in table.Value)
+			{
+				allColumns.Add($"{table.Key}.{column}");
+			}
+		}
+
+		sql.Append(string.Join(", ", allColumns));
+		sql.Append(" FROM ");
+		sql.Append(string.Join(", ", tablesWithColumns.Keys));
 
 		return sql.ToString();
 	}
