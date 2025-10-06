@@ -17,7 +17,9 @@ public class RawSQLBuilder
 	/// <returns></returns>
 	public static string SelectWithJoins(Dictionary<string, List<string>> tablesWithColumns, 
 		List<JoinTypes> joins = null,
-		Dictionary<int, string> tableAliases = null)
+		Dictionary<int, string> tableAliases = null,
+		bool distinct = false,
+		int? limit = null)
 	{
 		var allColumns = new List<string>();
 		var sql = new StringBuilder();
@@ -46,6 +48,8 @@ public class RawSQLBuilder
 				}
 			}
 		}
+		if (distinct) sql.Append(" DISTINCT");
+		if (limit.HasValue) sql.Append($" LIMIT {limit} ");
 
 		return sql.ToString();
 	}
@@ -55,7 +59,9 @@ public class RawSQLBuilder
 	/// </summary>
 	/// <param name="tablesWithColumns"></param>
 	/// <returns></returns>
-	public static string OnlySelect(Dictionary<string, List<string>> tablesWithColumns)
+	public static string OnlySelect(Dictionary<string, List<string>> tablesWithColumns,
+		bool distinct = false,
+		int? limit = null)
 	{
 		var allColumns = new List<string>();
 		var sql = new StringBuilder();
@@ -72,6 +78,8 @@ public class RawSQLBuilder
 		sql.Append(string.Join(", ", allColumns));
 		sql.Append(" FROM ");
 		sql.Append(string.Join(", ", tablesWithColumns.Keys));
+		if (distinct) sql.Append(" DISTINCT");
+		if (limit.HasValue) sql.Append($" LIMIT {limit} ");
 
 		return sql.ToString();
 	}
