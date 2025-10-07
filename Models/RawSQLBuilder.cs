@@ -1,6 +1,5 @@
 ﻿using RawSQLGenerator.Enums;
 using RawSQLGenerator.Helpers;
-using System.Drawing;
 using System.Text;
 
 namespace RawSQLGenerator.Models;
@@ -31,7 +30,7 @@ public class RawSQLBuilder
 		{
 			foreach (var column in table.Value)
 			{
-				allColumns.Add($"{table.Key}.{column}");
+				allColumns.Add($"{table.Key}.\"{column}\"");
 			}
 		}
 
@@ -56,15 +55,13 @@ public class RawSQLBuilder
 			sql.Append(" ORDER BY ");
 			foreach (var orderAtribute  in orderBy)
 			{
-				sql.Append(orderAtribute.Key);
-				sql.Append(" ");
-				sql.Append(orderAtribute.Value);
+				sql.Append($"{orderAtribute.Key} {orderAtribute.Value}");
 				if (count < orderBy.Count - 1)
 					sql.Append(", ");
 				count++;
 			}
 		}
-		if (orderBy != null)
+		if (groupBy != null)
 		{
 			var count = 0;
 			sql.Append(" GROUP BY ");
@@ -82,23 +79,30 @@ public class RawSQLBuilder
 		return sql.ToString();
 	}
 
-	public static string MainUpdate(Dictionary<string, List<string>> tablesWithColumns)
+	public static List<string> MainUpdate(Dictionary<string, Dictionary<string, string>> multiTableUpdates,
+		List<string> whereCondition = null)
 	{
-		var sql = new StringBuilder();
-		sql.Append("UPDATE ");
-		sql.Append(tablesWithColumns.FirstOrDefault().Key);
-		sql.Append(" SET");
-		
-		var columns = tablesWithColumns.Select(c => c.Value).First();
+		var query = new List<string>();
 		var count = 0;
-		foreach (var column in columns)
+		foreach (var tableUpdate in multiTableUpdates)
 		{
-			sql.Append($" {column}");
-			if (count < columns.Count - 1)
-				sql.Append(',');
+			var sql = new StringBuilder();
+			var tableName = tableUpdate.Key;
+			var updates = tableUpdate.Value;
+
+			if (updates.Any())
+			{
+				sql.Append($"UPDATE {tableName} SET ");
+
+				var setClauses = updates.Select(kvp => $"{kvp.Key} = '{kvp.Value}'");
+				sql.Append(string.Join(", ", setClauses));
+			}
+			if (whereCondition != null)
+				sql.Append($" WHERE {whereCondition[count]} ");
 			count++;
+			query.Add(sql.ToString());
 		}
 
-		return sql.ToString();
+		return query;
 	}
 }
