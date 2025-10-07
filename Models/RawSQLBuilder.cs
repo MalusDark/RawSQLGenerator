@@ -20,7 +20,8 @@ public class RawSQLBuilder
 		Dictionary<int, string> tableAliases = null,
 		bool distinct = false,
 		int? limit = null,
-		Dictionary<string, string> orderBy = null)
+		Dictionary<string, OrderTypes> orderBy = null,
+		List<string> groupBy = null)
 	{
 		var allColumns = new List<string>();
 		var sql = new StringBuilder();
@@ -59,6 +60,18 @@ public class RawSQLBuilder
 				sql.Append(" ");
 				sql.Append(orderAtribute.Value);
 				if (count < orderBy.Count - 1)
+					sql.Append(", ");
+				count++;
+			}
+		}
+		if (orderBy != null)
+		{
+			var count = 0;
+			sql.Append(" GROUP BY ");
+			foreach (var groupAtribute in groupBy)
+			{
+				sql.Append(groupAtribute); 
+				if (count < groupBy.Count - 1)
 					sql.Append(", ");
 				count++;
 			}
