@@ -81,4 +81,24 @@ public class RawSQLBuilder
 
 		return sql.ToString();
 	}
+
+	public static string MainUpdate(Dictionary<string, List<string>> tablesWithColumns)
+	{
+		var sql = new StringBuilder();
+		sql.Append("UPDATE ");
+		sql.Append(tablesWithColumns.FirstOrDefault().Key);
+		sql.Append(" SET");
+		
+		var columns = tablesWithColumns.Select(c => c.Value).First();
+		var count = 0;
+		foreach (var column in columns)
+		{
+			sql.Append($" {column}");
+			if (count < columns.Count - 1)
+				sql.Append(',');
+			count++;
+		}
+
+		return sql.ToString();
+	}
 }
