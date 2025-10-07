@@ -15,11 +15,12 @@ public class RawSQLBuilder
 	/// </summary>
 	/// <param name="tablesWithColumns"></param>
 	/// <returns></returns>
-	public static string SelectWithJoins(Dictionary<string, List<string>> tablesWithColumns, 
+	public static string MainSelect(Dictionary<string, List<string>> tablesWithColumns, 
 		List<JoinTypes> joins = null,
 		Dictionary<int, string> tableAliases = null,
 		bool distinct = false,
-		int? limit = null)
+		int? limit = null,
+		Dictionary<string, string> orderBy = null)
 	{
 		var allColumns = new List<string>();
 		var sql = new StringBuilder();
@@ -48,36 +49,20 @@ public class RawSQLBuilder
 				}
 			}
 		}
-		if (distinct) sql.Append(" DISTINCT");
-		if (limit.HasValue) sql.Append($" LIMIT {limit} ");
-
-		return sql.ToString();
-	}
-
-	/// <summary>
-	/// Method for generating a ONLY select query without joins based on your dictionary of the form «table name - column name»
-	/// </summary>
-	/// <param name="tablesWithColumns"></param>
-	/// <returns></returns>
-	public static string OnlySelect(Dictionary<string, List<string>> tablesWithColumns,
-		bool distinct = false,
-		int? limit = null)
-	{
-		var allColumns = new List<string>();
-		var sql = new StringBuilder();
-		sql.Append("SELECT ");
-
-		foreach (var table in tablesWithColumns)
+		if (orderBy != null)
 		{
-			foreach (var column in table.Value)
+			var count = 0;
+			sql.Append(" ORDER BY ");
+			foreach (var orderAtribute  in orderBy)
 			{
-				allColumns.Add($"{table.Key}.{column}");
+				sql.Append(orderAtribute.Key);
+				sql.Append(" ");
+				sql.Append(orderAtribute.Value);
+				if (count < orderBy.Count - 1)
+					sql.Append(", ");
+				count++;
 			}
 		}
-
-		sql.Append(string.Join(", ", allColumns));
-		sql.Append(" FROM ");
-		sql.Append(string.Join(", ", tablesWithColumns.Keys));
 		if (distinct) sql.Append(" DISTINCT");
 		if (limit.HasValue) sql.Append($" LIMIT {limit} ");
 
